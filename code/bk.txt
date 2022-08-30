@@ -1,0 +1,36 @@
+function [nstart,nend,numofdig]=splitsignal(compsig,fs,silent_time)
+%----------------------------------------------
+%compsig=complete signal to be analysed 
+%for silent zones(time b/w key presses) b/w digit tones
+%fs= sampling frequency
+%silent_time= assumed time between key presses
+
+%takes signal, fs ,silent_time as input and returns start and end times for digits and
+%number of digits 
+%---------------------------------------------
+
+
+compsig = abs(compsig / max(abs(compsig))); % normalize compsig and taking absoulte value
+
+silenttime_n = round(silent_time*fs);%assuming time b/w key presses is less that silent_time
+
+compsig = filter(ones(1,silenttime_n) / silenttime_n, 1, compsig);%finding moving average of the signal
+
+compsig=compsig > 0.02;%setting everything below 0.01 to 0 and above it to 1 
+compsig = diff(compsig);%taking difference of adjacent terms 
+
+nzi = find(compsig ~= 0)';%vector of non-zero indices(which are start and end of key signals)
+
+
+numofdig=(length(nzi)/2);
+nstart=zeros(numofdig);
+nend=zeros(numofdig);
+
+nzi
+
+for i=0:numofdig-1
+    nstart(i+1)=nzi(1+2*i);
+    nend(i+1)=nzi(2+2*i);
+end
+
+end
